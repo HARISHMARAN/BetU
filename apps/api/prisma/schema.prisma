@@ -1,0 +1,88 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum BetStatus {
+  CREATED
+  ACTIVE
+  PAUSED
+  COMPLETED
+  ABANDONED
+}
+
+enum AuthProvider {
+  GUEST
+  EMAIL
+  APPLE
+  GOOGLE
+}
+
+model User {
+  id           String       @id @default(uuid())
+  email        String?      @unique
+  passwordHash String?
+  displayName String?
+  timezone     String?      @default("UTC")
+  authProvider AuthProvider @default(GUEST)
+  isGuest      Boolean      @default(true)
+  timeIqScore  Int          @default(0)
+  createdAt    DateTime     @default(now())
+  updatedAt    DateTime     @updatedAt
+
+  categories Category[]
+  bets       Bet[]
+
+  @@map("users")
+}
+
+model Category {
+  id        String   @id @default(uuid())
+  userId    String?
+  user      User?    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  name      String
+  icon      String?
+  isDefault Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  bets Bet[]
+
+  @@unique([userId, name])
+  @@map("categories")
+}
+
+model Bet {
+  id         String  @id @default(uuid())
+  userId     String
+  user       User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  categoryId String
+  category   Category @relation(fields: [categoryId], references: [id])
+
+  title            String
+  predictedSeconds Int
+  actualSeconds    Int?
+
+  startedAt  DateTime?
+  finishedAt DateTime?
+  pausedAt   DateTime?
+  pausedSeconds Int    @default(0)
+
+  status BetStatus @default(CREATED)
+
+  accuracyScore              Float?
+  estimationErrorSeconds     Int?
+  estimationErrorPercentage  Float?
+  betuPredictionSeconds      Int?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId, status])
+  @@index([userId, categoryId])
+  @@index([userId, finishedAt])
+  @@map("bets")
+}
