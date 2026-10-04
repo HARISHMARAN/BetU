@@ -1,9 +1,10 @@
+/** Values match the Prisma BetStatus enum (apps/api/prisma/schema.prisma) — the API's wire format. */
 export enum BetStatus {
-  CREATED = "created",
-  ACTIVE = "active",
-  PAUSED = "paused",
-  COMPLETED = "completed",
-  ABANDONED = "abandoned",
+  CREATED = "CREATED",
+  ACTIVE = "ACTIVE",
+  PAUSED = "PAUSED",
+  COMPLETED = "COMPLETED",
+  ABANDONED = "ABANDONED",
 }
 
 export enum Confidence {
